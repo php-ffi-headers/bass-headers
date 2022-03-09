@@ -47,7 +47,7 @@
         }
     },
     "provide": {
-        "ffi-headers/headers-contracts-implementation": "^1.0"
+        "ffi-headers/contracts-implementation": "^1.0"
     },
     "extra": {
         "branch-alias": {
