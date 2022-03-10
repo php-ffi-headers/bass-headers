@@ -15,7 +15,6 @@ use FFI\Env\Runtime;
 use FFI\Headers\Bass;
 use FFI\Headers\Bass\Platform;
 use FFI\Headers\Bass\Tests\BinaryCompatibilityTestCase\Downloader;
-use FFI\Headers\Bass\Tests\BinaryCompatibilityTestCase\DownloaderResult;
 use FFI\Headers\Bass\Version;
 
 /**

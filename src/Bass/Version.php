@@ -11,8 +11,15 @@ declare(strict_types=1);
 
 namespace FFI\Headers\Bass;
 
-enum Version: string implements VersionInterface
+use FFI\Contracts\Headers\Version as CustomVersion;
+use FFI\Contracts\Headers\Version\Comparable;
+use FFI\Contracts\Headers\Version\ComparableInterface;
+use FFI\Contracts\Headers\VersionInterface;
+
+enum Version: string implements ComparableInterface
 {
+    use Comparable;
+
     case V2_0 = '2.0';
     case V2_1 = '2.1';
     case V2_2 = '2.2';
@@ -41,23 +48,7 @@ enum Version: string implements VersionInterface
 
         return self::tryFrom($version)
             ?? $versions[$version]
-            ??= new class($version) implements VersionInterface {
-                /**
-                 * @param non-empty-string $version
-                 */
-                public function __construct(
-                    private string $version,
-                ) {
-                }
-
-                /**
-                 * {@inheritDoc}
-                 */
-                public function toString(): string
-                {
-                    return $this->version;
-                }
-            };
+            ??= CustomVersion::fromString($version);
     }
 
     /**

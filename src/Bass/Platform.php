@@ -11,6 +11,9 @@ declare(strict_types=1);
 
 namespace FFI\Headers\Bass;
 
+use FFI\Contracts\Headers\Version as ComparableVersion;
+use FFI\Contracts\Headers\VersionInterface;
+
 enum Platform
 {
     case WINDOWS;
@@ -23,10 +26,12 @@ enum Platform
      */
     public function supportedBy(VersionInterface $version): bool
     {
+        $version = ComparableVersion::fromVersion($version);
+
         return match ($this) {
             self::WINDOWS => true,
-            self::LINUX => \version_compare($version->toString(), '2.4', '>='),
-            self::DARWIN => \version_compare($version->toString(), '2.2', '>='),
+            self::LINUX => $version->gte('2.4'),
+            self::DARWIN => $version->gte('2.2'),
         };
     }
 }

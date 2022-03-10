@@ -18,7 +18,7 @@ use FFI\Contracts\Preprocessor\PreprocessorInterface;
 use FFI\Headers\Bass\HeadersDownloader;
 use FFI\Headers\Bass\Platform;
 use FFI\Headers\Bass\Version;
-use FFI\Headers\Bass\VersionInterface;
+use FFI\Contracts\Headers\VersionInterface;
 use FFI\Preprocessor\Preprocessor;
 
 class Bass implements HeaderInterface
