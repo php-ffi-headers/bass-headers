@@ -66,13 +66,19 @@ class BinaryCompatibilityTestCase extends TestCase
         $binary = __DIR__ . '/storage/bass-' . $version->toString() . '.dll';
 
         if (!\is_file($binary)) {
-            Downloader::download('https://www.un4seen.com/files/bass%s.zip', [
+            $result = Downloader::download('https://www.un4seen.com/files/bass%s.zip', [
                 \str_replace('.', '', $version->toString()),
-            ])
-                ->whenExists('x64/bass.dll',
-                    static fn (DownloaderResult $ctx) => $ctx->extract('x64/bass.dll', $binary),
-                    static fn (DownloaderResult $ctx) => $ctx->extract('bass.dll', $binary),
-                );
+            ]);
+
+            // x64 and >= 2.4
+            if (\PHP_INT_SIZE === 8 && $result->exists('x64/bass.dll')) {
+                $result->extract('x64/bass.dll', $binary);
+            // x86 and < 2.4
+            } elseif (\PHP_INT_SIZE === 4 && $result->exists('bass.dll')) {
+                $result->extract('bass.dll', $binary);
+            } else {
+                $this->markTestSkipped('Incompatible OS bits');
+            }
         }
 
         $this->expectNotToPerformAssertions();
@@ -94,10 +100,19 @@ class BinaryCompatibilityTestCase extends TestCase
         $binary = __DIR__ . '/storage/libbass-' . $version->toString() . '.dylib';
 
         if (!\is_file($binary)) {
-            Downloader::download('https://www.un4seen.com/files/bass%s-osx.zip', [
+            $result = Downloader::download('https://www.un4seen.com/files/bass%s-osx.zip', [
                 \str_replace('.', '', $version->toString()),
-            ])
-                ->extract('libbass.dylib', $binary);
+            ]);
+
+            // x64 and >= 2.4
+            if (\PHP_INT_SIZE === 8 && \version_compare($version->toString(), '2.4', '>=')) {
+                $result->extract('libbass.dylib', $binary);
+            // x86 and < 2.4
+            } elseif (\PHP_INT_SIZE === 4 && \version_compare($version->toString(), '2.4', '<')) {
+                $result->extract('libbass.dylib', $binary);
+            } else {
+                $this->markTestSkipped('Incompatible OS bits');
+            }
         }
 
         $this->expectNotToPerformAssertions();

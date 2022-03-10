@@ -45,6 +45,15 @@ class DownloaderResult
 
     /**
      * @param string $file
+     * @return bool
+     */
+    public function exists(string $file): bool
+    {
+        return isset($this->phar[$file]);
+    }
+
+    /**
+     * @param string $file
      * @param string $target
      * @return $this
      */
