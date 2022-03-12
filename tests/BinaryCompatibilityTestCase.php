@@ -11,24 +11,18 @@ declare(strict_types=1);
 
 namespace FFI\Headers\Bass\Tests;
 
-use FFI\Env\Runtime;
 use FFI\Headers\Bass;
 use FFI\Headers\Bass\Platform;
-use FFI\Headers\Bass\Tests\BinaryCompatibilityTestCase\Downloader;
 use FFI\Headers\Bass\Version;
+use FFI\Headers\Testing\Downloader;
 
-/**
- * @requires extension ffi
- */
 class BinaryCompatibilityTestCase extends TestCase
 {
-    public function setUp(): void
+    private function skipIfPlatformNotSupported(Version $version, Platform $platform): void
     {
-        if (!Runtime::isAvailable()) {
-            $this->markTestSkipped('An ext-ffi extension must be available and enabled');
+        if (!$version->supportedOn($platform)) {
+            $this->markTestSkipped($platform->name . ' not supported by version ' . $version->toString());
         }
-
-        parent::setUp();
     }
 
     /**
@@ -37,23 +31,16 @@ class BinaryCompatibilityTestCase extends TestCase
      */
     public function testLinuxBinaryCompatibility(Version $version): void
     {
-        if (!$version->supportedOn(Platform::LINUX)) {
-            $this->markTestSkipped('Linux not supported by version ' . $version->toString());
-        }
+        $this->skipIfPlatformNotSupported($version, Platform::LINUX);
 
-        $binary = __DIR__ . '/storage/libbass-' . $version->toString() . '.so';
-
-        if (!\is_file($binary)) {
-            Downloader::download('https://www.un4seen.com/files/bass%s-linux.zip', [
+        if (!\is_file($binary = __DIR__ . '/storage/libbass-' . $version->toString() . '.so')) {
+            Downloader::zip('https://www.un4seen.com/files/bass%s-linux.zip', [
                 \str_replace('.', '', $version->toString()),
             ])
                 ->extract('x64/libbass.so', $binary);
         }
 
-        $this->expectNotToPerformAssertions();
-        $headers = (string)Bass::create(Platform::LINUX, $version);
-
-        \FFI::cdef($headers, $binary);
+        $this->assertHeadersCompatibleWith(Bass::create(Platform::LINUX, $version), $binary);
     }
 
     /**
@@ -62,10 +49,8 @@ class BinaryCompatibilityTestCase extends TestCase
      */
     public function testWindowsBinaryCompatibility(Version $version): void
     {
-        $binary = __DIR__ . '/storage/bass-' . $version->toString() . '.dll';
-
-        if (!\is_file($binary)) {
-            $result = Downloader::download('https://www.un4seen.com/files/bass%s.zip', [
+        if (!\is_file($binary = __DIR__ . '/storage/bass-' . $version->toString() . '.dll')) {
+            $result = Downloader::zip('https://www.un4seen.com/files/bass%s.zip', [
                 \str_replace('.', '', $version->toString()),
             ]);
 
@@ -80,10 +65,7 @@ class BinaryCompatibilityTestCase extends TestCase
             }
         }
 
-        $this->expectNotToPerformAssertions();
-        $headers = (string)Bass::create(Platform::WINDOWS, $version);
-
-        \FFI::cdef($headers, $binary);
+        $this->assertHeadersCompatibleWith(Bass::create(Platform::WINDOWS, $version), $binary);
     }
 
     /**
@@ -92,14 +74,10 @@ class BinaryCompatibilityTestCase extends TestCase
      */
     public function testDarwinBinaryCompatibility(Version $version): void
     {
-        if (!$version->supportedOn(Platform::DARWIN)) {
-            $this->markTestSkipped('OSX not supported by version ' . $version->toString());
-        }
+        $this->skipIfPlatformNotSupported($version, Platform::DARWIN);
 
-        $binary = __DIR__ . '/storage/libbass-' . $version->toString() . '.dylib';
-
-        if (!\is_file($binary)) {
-            $result = Downloader::download('https://www.un4seen.com/files/bass%s-osx.zip', [
+        if (!\is_file($binary = __DIR__ . '/storage/libbass-' . $version->toString() . '.dylib')) {
+            $result = Downloader::zip('https://www.un4seen.com/files/bass%s-osx.zip', [
                 \str_replace('.', '', $version->toString()),
             ]);
 
@@ -114,9 +92,6 @@ class BinaryCompatibilityTestCase extends TestCase
             }
         }
 
-        $this->expectNotToPerformAssertions();
-        $headers = (string)Bass::create(Platform::DARWIN, $version);
-
-        \FFI::cdef($headers, $binary);
+        $this->assertHeadersCompatibleWith(Bass::create(Platform::DARWIN, $version), $binary);
     }
 }

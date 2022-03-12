@@ -13,10 +13,13 @@ namespace FFI\Headers\Bass\Tests;
 
 use FFI\Headers\Bass\Platform;
 use FFI\Headers\Bass\Version;
+use FFI\Headers\Testing\TestingTrait;
 use PHPUnit\Framework\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
 {
+    use TestingTrait;
+
     /**
      * @return array<array{Platform, Version}>
      */

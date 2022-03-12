@@ -32,4 +32,20 @@ final class ContentRenderingTestCase extends TestCase
 
         (string)Bass::create($platform, $version);
     }
+
+    /**
+     * @testdox Testing that headers contain correct syntax
+     *
+     * @dataProvider configDataProvider
+     */
+    public function testCompilation(Platform $platform, Version $version): void
+    {
+        if (!$platform->supportedBy($version)) {
+            $this->expectExceptionMessage('not supported by version');
+        }
+
+        $this->assertHeadersSyntaxValid(
+            Bass::create($platform, $version)
+        );
+    }
 }
